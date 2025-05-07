@@ -1,0 +1,1 @@
+Para rodar um arquivo individual typescipt use o exemplo: ts-node .\src\utils\validators\Cnpj.ts
