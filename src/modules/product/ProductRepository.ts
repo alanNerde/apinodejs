@@ -45,4 +45,12 @@ class ProductRepository {
       await db.run(sql, values);
     }
   }
+
+  async delete(id: number): Promise<void> {
+    const db = await getDB();
+    db.run(`DELETE FROM PRODUCT WHERE ID = ?`, [id]);
+  }
 }
+
+const productRepository = new ProductRepository();
+export default productRepository;
