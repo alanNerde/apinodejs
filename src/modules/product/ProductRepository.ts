@@ -13,7 +13,7 @@ class ProductRepository {
 
   async findAll(): Promise<Product[]> {
     const db = await getDB();
-    const products = await db.all('select * from products');
+    const products = await db.all('select * from product');
     return products;
   }
 
