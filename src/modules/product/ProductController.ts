@@ -7,7 +7,7 @@ class ProductController {
   async getAll(req: Request, res: Response) {
     try {
       const products: Product[] = await productService.listAllProduct();
-      return res.json(products);
+      return res.status(200).json(products);
     } catch (error) {
       console.error('Erro ao buscar produto:', error);
       return res.status(500).json({ error: 'Erro interno ao buscar produtos' });
@@ -62,13 +62,30 @@ class ProductController {
       await productService.updateProduct(id, req.body);
 
       return res
-        .status(200)
+        .status(204)
         .json({ Message: 'Produto atualizado com sucesso.' });
     } catch (error) {
       console.error('Error ao atualizar produto', error);
       return res
         .status(500)
         .json({ error: 'Erro interno ao atualizar produto' });
+    }
+  }
+
+  async delete(req: Request, res: Response) {
+    try {
+      const id = parseInt(req.params.id, 10);
+
+      if (isNaN(id)) {
+        return res.status(400).json({ error: 'ID inválido' });
+      }
+
+      await productService.deleteProduct(id);
+
+      return res.status(204).json({ message: 'Produto deletado com sucesso.' });
+    } catch (error) {
+      console.error('Error ao deletar produto', error);
+      return res.status(500).json({ error: 'Erro interno ao deletar produto' });
     }
   }
 }

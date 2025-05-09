@@ -18,11 +18,11 @@ class ProductService {
     id: number,
     dados: Partial<Omit<Product, 'id'>>
   ): Promise<void> {
-    return await productRepository.put(id, dados);
+    await productRepository.put(id, dados);
   }
 
   async deleteProduct(id: number): Promise<void> {
-    return await productRepository.delete(id);
+    await productRepository.delete(id);
   }
 }
 
