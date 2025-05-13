@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import productController from './ProductController';
+import bolinhaController from './ProductController';
 
 const router = Router();
 
-router.get('/', productController.getAll);
-router.get('/:id', productController.findById);
-router.post('/', productController.create);
-router.put('/:id', productController.update);
-router.delete('/:id', productController.delete);
+router.get('/', bolinhaController.getAll);
+router.get('/:id', bolinhaController.findById);
+router.post('/', bolinhaController.create);
+router.put('/:id', bolinhaController.update);
+router.delete('/:id', bolinhaController.delete);
 
 export default router;

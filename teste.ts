@@ -1,6 +1,10 @@
-console.log('Início'); // (1) síncrono
-setTimeout(() => console.log('T1'), 0); // (2) macro-tarefa
-Promise.resolve()
-  .then(() => console.log('P1')) // (3) micro-tarefa
-  .then(() => console.log('P2'));
-console.log('Fim'); // (4) síncrono
+class teste {
+  async velocidade(metros: number, segundos: number) {
+    return await (metros / segundos);
+  }
+}
+
+const clasteste = new teste();
+const x = clasteste.velocidade(10, 2);
+
+console.log(x);
