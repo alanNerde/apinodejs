@@ -1,5 +1,5 @@
 import { getDB } from '../../database/connection';
-import { Address } from './Address';
+import { Address } from './AddressModel';
 
 class AddressRepository {
   async create(adress: Omit<Address, 'id'>): Promise<void> {
