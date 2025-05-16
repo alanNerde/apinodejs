@@ -11,8 +11,11 @@ export const AddressSchema = z.object({
 
      return qtdDigit === 8;
     }, {message: 'Cep deve ter 8 digitos'}
-  )
-
+  ),
+  city: z.number().int(),
+  complemente: z.string(),
+  type: z.enum(['E', 'C', 'R']),
+  customer: z.number().int()
 });
 
 export type AddressInput = z.infer<typeof AddressSchema>;

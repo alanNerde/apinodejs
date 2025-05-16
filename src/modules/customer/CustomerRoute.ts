@@ -9,11 +9,11 @@ router.get('/:id', CustomerController.findById);
 router.post(
   '/',
   validateFields([
-    'nome',
+    'name',
     'cpf_cnpj',
-    'telefone',
+    'phone',
     'email',
-    'data_nascimento',
+    'birth_date',
     'status',
   ]),
   CustomerController.create
