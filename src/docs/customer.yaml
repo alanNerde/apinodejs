@@ -1,0 +1,171 @@
+tags:
+  - name: Customer
+    description: Operações relacionadas a clientes
+
+components:
+  schemas:
+    Customer:
+      type: object
+      required:
+        - name
+        - cpf_cnpj
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          example: João Silva
+        cpf_cnpj:
+          type: string
+          minLength: 11
+          maxLength: 14
+          pattern: '^\d{11}$|^\d{14}$'
+          example: 12345678900
+        email:
+          type: string
+          format: email
+          example: joao@email.com
+        phone:
+          type: string
+          example: "(11) 99999-9999"
+        birth_date:
+          type: string
+          example: yyyy-mm-dd
+        status:
+          type: string
+          enum:
+            - A
+            - I
+          example: A
+
+paths:
+  /customer:
+    get:
+      summary: Retorna a lista de todos os clientes
+      tags: [Customer]
+      responses:
+        200:
+          description: Lista de clientes retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Customer"
+
+    post:
+      summary: Cria um novo cliente
+      tags: [Customer]
+      requestBody:
+        description: Dados para criação de um cliente
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - cpf_cnpj
+                - email
+              properties:
+                name:
+                  type: string
+                  example: Maria Souza
+                cpf_cnpj:
+                  type: string
+                  example: 98765432100
+                email:
+                  type: string
+                  example: maria@email.com
+                phone:
+                  type: string
+                  example: "(21) 98888-8888"
+      responses:
+        201:
+          description: Cliente criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        400:
+          description: Dados inválidos
+
+  /customer/{id}:
+    get:
+      summary: Retorna um cliente pelo ID
+      tags: [Customer]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: ID do cliente
+      responses:
+        200:
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        404:
+          description: Cliente não encontrado
+
+    put:
+      summary: Atualiza um cliente pelo ID
+      tags: [Customer]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: ID do cliente
+      requestBody:
+        description: Dados para atualizar o cliente
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Maria Souza
+                cpf_cnpj:
+                  type: string
+                  example: 98765432100
+                email:
+                  type: string
+                  example: maria@email.com
+                phone:
+                  type: string
+                  example: "(21) 98888-8888"
+      responses:
+        200:
+          description: Cliente atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        404:
+          description: Cliente não encontrado
+
+    delete:
+      summary: Deleta um cliente pelo ID
+      tags: [Customer]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: ID do cliente
+      responses:
+        204:
+          description: Cliente deletado com sucesso
+        404:
+          description: Cliente não encontrado

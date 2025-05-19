@@ -1,0 +1,132 @@
+// Description: Configuração do Swagger para documentação da API
+tags:
+  - name: Products
+    description: Operations related to products
+
+paths:
+  /product:
+    get:
+      tags:
+        - Products
+      summary: List all products
+      description: Retrieve a list of all products.
+      responses:
+        "200":
+          description: A list of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+    post:
+      tags:
+        - Products
+      summary: Create a new product
+      description: Create a new product with the provided details.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Product"
+      responses:
+        "201":
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+  /product/{id}:
+    get:
+      tags:
+        - Products
+      summary: Get a product by ID
+      description: Retrieve a product by its unique identifier.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the product to retrieve.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A single product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Product not found
+    put:
+      tags:
+        - Products
+      summary: Update a product by ID
+      description: Update the details of an existing product.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the product to update.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Product"
+      responses:
+        "200":
+          description: Product updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Product not found
+    delete:
+      tags:
+        - Products
+      summary: Delete a product by ID
+      description: Delete a product by its unique identifier.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the product to delete.
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Product deleted successfully
+        "404":
+          description: Product not found
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: "12"
+        name:
+          type: string
+          example: "Product Name"
+        description:
+          type: string
+          example: "Product Description"
+        price:
+          type: number
+          format: float
+          example: 19.99
+        status:
+          type: enum['A','I']
+          example: "A"
+      required:
+        - name
+        - price
+        - description
+        - status
+      description: A product object
