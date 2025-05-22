@@ -1,25 +1,15 @@
 import { getDB } from '../../database/connection';
 import { orderItemRepository } from '../orderItem/OrderItemRepository';
+import { OrderDto, OrderDtoWithoutId } from './OrderDto';
+import { Order } from './OrderModel';
 import OrderRepository from './OrderRepository';
 
-export default new (class OrderService {
+export class OrderService {
   /**
    * Cria uma venda e todos os seus itens dentro de uma transação.
    * @param dados Objeto contendo os campos da venda e um array `itens`
    */
-  async criar(dados: {
-    customer: number;
-    total_amount: number;
-    date: string;
-    status: string;
-    address: number;
-    itens: Array<{
-      product: number;
-      amount: number;
-      unit_price: number;
-      status: string;
-    }>;
-  }): Promise<number> {
+  async criar(dados: OrderDto): Promise<number> {
     const db = await getDB();
     try {
       await db.run('BEGIN TRANSACTION');
@@ -53,4 +43,23 @@ export default new (class OrderService {
       throw err;
     }
   }
-})();
+
+  async put(id: number, date: Partial<OrderDtoWithoutId>): Promise<void> {
+    await OrderRepository.putOrder(id, date);
+  }
+
+  async getAll(): Promise<Order[] | null> {
+    return await OrderRepository.listAll();
+  }
+
+  async getById(id: number): Promise<Order | null> {
+    return await OrderRepository.listById(id);
+  }
+
+  async getOrderWithItens(id: number): Promise<OrderDtoWithoutId | null> {
+    return OrderRepository.listOrderWithItens(id);
+  }
+}
+
+const orderService = new OrderService();
+export default orderService;

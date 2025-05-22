@@ -20,6 +20,10 @@ class OrderItemRepository {
     );
     return Number(result.lastID);
   }
+
+  async put(): Promise<void> {}
+
+  async delete(): Promise<void> {}
 }
 
 export const orderItemRepository = new OrderItemRepository();
