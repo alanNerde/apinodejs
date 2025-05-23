@@ -60,7 +60,15 @@ export default new (class CustomerController {
         return res.status(400).json({ error: 'ID inválido' });
       }
 
-      const { name, cpf_cnpj, phone, email, birth_date, status } = req.body;
+      const validacaoZod = CustomerSchema.safeParse(req.body);
+
+      if(!validacaoZod.success){
+        return res.status(400).json({ errors: validacaoZod.error.errors });
+      }
+
+      const dadosValidados = validacaoZod.data;
+
+      const { name, cpf_cnpj, phone, email, birth_date, status } = dadosValidados;
       await CustomerService.updateCustomer(id, {
         name,
         cpf_cnpj,
@@ -91,7 +99,7 @@ export default new (class CustomerController {
 
       await CustomerService.deleteCustomer(id);
 
-      return res.status(201).json({ message: 'Cliente deletado com sucesso' });
+      return res.status(204).json({ message: 'Cliente deletado com sucesso' });
     } catch (error) {
       console.log('Erro ao deletar cliente:', error);
       return res.status(500).json({ error: 'Erro interno ao deletar cliente' });

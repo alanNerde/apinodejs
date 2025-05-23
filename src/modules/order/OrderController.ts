@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import OrderService from './OrderService';
+import orderService from './OrderService';
 
 export class OrderController {
   async create(req: Request, res: Response) {
@@ -11,7 +11,7 @@ export class OrderController {
         return res.status(400).json({ error: 'Dados inválidos para venda' });
       }
 
-      await OrderService.criar(dados);
+      await orderService.criar(dados);
       res.status(201).json({ message: 'Venda criada com sucesso' });
     } catch (error: any) {
       res.status(500).json({ error: error.message || 'Erro ao criar venda' });
@@ -20,7 +20,7 @@ export class OrderController {
 
   async getAll(req: Request, res: Response) {
     try {
-      const orders = await OrderService.getAll();
+      const orders = await orderService.getAll();
 
       if (orders === null) {
         return res
@@ -47,7 +47,7 @@ export class OrderController {
           .json({ error: 'Um número deve ser passado como parâmetro' });
       }
 
-      const order = await OrderService.getById(idNumber);
+      const order = await orderService.getById(idNumber);
 
       if (order === null) {
         return res.status(400).json({ error: 'Id não encontrado' });
@@ -72,7 +72,7 @@ export class OrderController {
           .json({ error: 'Um número deve ser passado como parâmetro' });
       }
 
-      const order = await OrderService.getOrderWithItens(idNumber);
+      const order = await orderService.getOrderWithItens(idNumber);
 
       if (order === null) {
         return res.status(400).json({ error: 'Id não encontrado' });
@@ -95,12 +95,12 @@ export class OrderController {
         return res.status(400).json({ error: 'ID não é um número' });
       }
 
-      if (OrderService.getById(id) === null) {
+      if (orderService.getById(id) === null) {
         return res.status(400).json({ message: 'ID não encontrado' });
       }
 
       const { customer, total_amount, date, status, address } = req.body;
-      await OrderService.put(id, {
+      await orderService.put(id, {
         customer,
         total_amount,
         date,
@@ -108,10 +108,35 @@ export class OrderController {
         address,
       });
 
-      res.status(201).json(OrderService.getById(id));
+      res.status(201).json(orderService.getById(id));
     } catch (error) {
       console.error('Erro ao atualizar Order:', error);
       return res.status(500).json({ error: 'Erro interno ao atualizar Order' });
+    }
+  }
+
+  async delete(req: Request, res: Response) {
+    try {
+      const id = parseInt(req.params.id, 10);
+
+      if (isNaN(id)) {
+        return res.status(400).json({ error: 'ID não é um número' });
+      }
+
+      const order = await orderService.getById(id);
+
+      if (!order) {
+        return res.status(400).json({ message: 'ID não encontrado' });
+      }
+
+      await orderService.delete(id);
+
+      res.status(200).json({ message: 'order deletada com sucesso' });
+    } catch (error) {
+      console.log('Erro ao deletar order', error);
+      return res
+        .status(400)
+        .json({ erro: 'Erro interno ao deletar order', error });
     }
   }
 }

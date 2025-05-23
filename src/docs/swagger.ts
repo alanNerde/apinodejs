@@ -12,6 +12,10 @@ export function getSwaggerSpec() {
       description: 'DESCRICAO DENTRO DE SWAGGER.TS',
     },
     servers: [{ url: 'http://localhost:3000/api' }],
+    tags: [
+      ...(productDocument.tags || []),
+      ...(customerDocument.tags || [])
+    ],
     paths: {
       ...productDocument.paths,
       ...customerDocument.paths,

@@ -1,0 +1,31 @@
+#tag para identificar o conjunto de endpoints relacionados a essa tag na ui do swagger
+
+tags:
+  - name: Order
+    description: Operações relacionadas as vendas
+
+path:
+  /order:
+    get:
+      tags: [Order]
+      sumarry: Lista todos as vendas s/ itens
+      Description:
+      responses:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/Order"
+
+
+components:
+  schemas:
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          exemple: 23
+          description: id da tabela order
+      required:

@@ -60,15 +60,12 @@ export class OrderRepository {
     const sql = `UPDATE 'ORDER' SET ${fieldsSingleString} `;
     await db.run(sql, values);
   }
+
+  async delete(id: number): Promise<void> {
+    const db = await getDB();
+    await db.run(`DELETE FROM 'ORDER' WHERE ID = ?`, [id]);
+  }
 }
 
 const order_repository = new OrderRepository();
 export default order_repository;
-
-let vendas;
-const carregarVendas = async () => {
-  vendas = await order_repository.listOrderWithItens(7);
-  console.log(vendas);
-};
-
-carregarVendas();

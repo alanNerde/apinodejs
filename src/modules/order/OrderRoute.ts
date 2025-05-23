@@ -8,5 +8,6 @@ router.put('/:id', OrderController.put);
 router.get('/:id', OrderController.getById);
 router.get('/', OrderController.getAll);
 router.get('/:id/itens', OrderController.getOrderWithItens);
+router.delete('/:id', OrderController.delete);
 
 export default router;

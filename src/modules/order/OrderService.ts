@@ -59,6 +59,10 @@ export class OrderService {
   async getOrderWithItens(id: number): Promise<OrderDtoWithoutId | null> {
     return OrderRepository.listOrderWithItens(id);
   }
+
+  async delete(id: number): Promise<void>{
+    return OrderRepository.delete(id);
+  }
 }
 
 const orderService = new OrderService();
