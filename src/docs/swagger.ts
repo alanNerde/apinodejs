@@ -2,21 +2,73 @@ import fs from 'fs';
 import path from 'path';
 import YAML from 'yamljs';
 
-const getYamlPath = (filename: string) => {
-  // Na Vercel, os arquivos estarão em /var/task
-  const possiblePaths = [
-    path.join(process.cwd(), 'src', 'docs', filename),
-    path.join(process.cwd(), 'dist', 'docs', filename),
-    path.join('/var/task', 'src', 'docs', filename),
-    path.join('/var/task', 'dist', 'docs', filename)
-  ];
+// Log para debug do ambiente
+console.log('Environment Debug:', {
+  NODE_ENV: process.env.NODE_ENV,
+  CWD: process.cwd(),
+  DIR_CONTENT: fs.readdirSync(process.cwd())
+});
 
-  for (const filePath of possiblePaths) {
-    if (fs.existsSync(filePath)) {
-      return filePath;
+// Função para carregar YAML embutido como string
+const getEmbeddedYaml = (filename: string) => {
+  // Se estiver em produção, use o YAML embutido
+  if (process.env.NODE_ENV === 'production') {
+    if (filename === 'product.yaml') {
+      return `
+tags:
+  - name: Products
+    description: Operations related to products
+paths:
+  /product:
+    get:
+      tags: [Products]
+      summary: Get all products
+      responses:
+        200:
+          description: Success
+    post:
+      tags: [Products]
+      summary: Create a product
+      responses:
+        201:
+          description: Created`;
+    }
+    if (filename === 'customer.yaml') {
+      return `
+tags:
+  - name: Customers
+    description: Operations related to customers
+paths:
+  /customer:
+    get:
+      tags: [Customers]
+      summary: Get all customers
+      responses:
+        200:
+          description: Success`;
+    }
+    if (filename === 'order.yaml') {
+      return `
+tags:
+  - name: Orders
+    description: Operations related to orders
+paths:
+  /order:
+    get:
+      tags: [Orders]
+      summary: Get all orders
+      responses:
+        200:
+          description: Success`;
     }
   }
-  throw new Error(`YAML file not found: ${filename}`);
+
+  // Em desenvolvimento, tenta carregar do arquivo
+  const yamlPath = path.join(process.cwd(), 'src', 'docs', filename);
+  if (!fs.existsSync(yamlPath)) {
+    throw new Error(`YAML file not found: ${yamlPath}`);
+  }
+  return fs.readFileSync(yamlPath, 'utf8');
 };
 
 export function getSwaggerSpec() {
@@ -24,9 +76,8 @@ export function getSwaggerSpec() {
     // Carrega os documentos YAML com tratamento de erro
     const loadYamlDocument = (filename: string) => {
       try {
-        const yamlPath = getYamlPath(filename);
-        console.log(`Loading YAML from: ${yamlPath}`);
-        const content = fs.readFileSync(yamlPath, 'utf8');
+        console.log(`Loading YAML: ${filename}`);
+        const content = getEmbeddedYaml(filename);
         return YAML.parse(content);
       } catch (error) {
         console.error(`Error loading ${filename}:`, error);
