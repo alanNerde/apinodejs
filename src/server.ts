@@ -1,14 +1,13 @@
 import dotenv from 'dotenv';
 import app from './app';
-import { getDB } from './database/connection';
 
 dotenv.config();
 
-async function bootstrap() {
-  await getDB();
-
+// Na Vercel, não precisamos iniciar o servidor explicitamente
+if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
 }
 
-bootstrap();
+// Exporta a aplicação para a Vercel
+export default app;
