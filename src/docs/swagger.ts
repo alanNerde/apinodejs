@@ -1,16 +1,33 @@
+import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import YAML from 'yamljs';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const getYamlPath = (filename: string) => {
+  // Na Vercel, os arquivos estarão em /var/task
+  const possiblePaths = [
+    path.join(process.cwd(), 'src', 'docs', filename),
+    path.join(process.cwd(), 'dist', 'docs', filename),
+    path.join('/var/task', 'src', 'docs', filename),
+    path.join('/var/task', 'dist', 'docs', filename)
+  ];
+
+  for (const filePath of possiblePaths) {
+    if (fs.existsSync(filePath)) {
+      return filePath;
+    }
+  }
+  throw new Error(`YAML file not found: ${filename}`);
+};
 
 export function getSwaggerSpec() {
   try {
     // Carrega os documentos YAML com tratamento de erro
     const loadYamlDocument = (filename: string) => {
       try {
-        return YAML.load(path.resolve(__dirname, filename));
+        const yamlPath = getYamlPath(filename);
+        console.log(`Loading YAML from: ${yamlPath}`);
+        const content = fs.readFileSync(yamlPath, 'utf8');
+        return YAML.parse(content);
       } catch (error) {
         console.error(`Error loading ${filename}:`, error);
         return { tags: [], paths: {}, components: { schemas: {} } };

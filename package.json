@@ -6,7 +6,7 @@
     "dev": "ts-node-dev src/server.ts",
     "build": "tsc && npm run copy-yaml",
     "start": "node dist/server.js",
-    "copy-yaml": "copyfiles -u 1 \"src/docs/*.yaml\" dist"
+    "copy-yaml": "copyfiles -u 1 \"src/docs/*.yaml\" dist/docs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
