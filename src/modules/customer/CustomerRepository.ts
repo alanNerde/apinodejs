@@ -1,66 +1,87 @@
-import { getDB } from '../../database/connection';
+import { supabase } from '../../database/supabase';
 import { Customer } from './CustomerModel';
 
 class CustomerRepository {
   async create(customer: Omit<Customer, 'id'>): Promise<void> {
-    const db = await getDB();
-    await db.run(
-      `INSERT INTO CUSTOMER (name, cpf_cnpj, phone, email, birth_date, status)
-      VALUES(?,?,?,?,?,?)`,
-      [
-        customer.name,
-        customer.cpf_cnpj,
-        customer.phone,
-        customer.email,
-        customer.birth_date,
-        customer.status,
-      ]
-    );
+    const { error } = await supabase
+      .from('customer')
+      .insert({
+        name: customer.name,
+        cpf_cnpj: customer.cpf_cnpj,
+        phone: customer.phone,
+        email: customer.email,
+        birth_date: customer.birth_date,
+        status: customer.status,
+      });
+
+    if (error) {
+      throw new Error(`Erro ao criar cliente: ${error.message}`);
+    }
   }
 
   async findAll(): Promise<Customer[]> {
-    const db = await getDB();
-    const customers = await db.all('SELECT * FROM CUSTOMER');
-    return customers;
+    const { data, error } = await supabase
+      .from('customer')
+      .select('*');
+
+    if (error) {
+      throw new Error(`Erro ao buscar clientes: ${error.message}`);
+    }
+
+    return data;
   }
 
   async findById(customerId: number): Promise<Customer | null> {
-    const db = await getDB();
-    const customer = await db.get('SELECT * FROM CUSTOMER WHERE ID = ?', [
-      customerId,
-    ]);
-    return customer ?? null;
+    const { data, error } = await supabase
+      .from('customer')
+      .select('*')
+      .eq('id', customerId)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null; // Cliente não encontrado
+      }
+      throw new Error(`Erro ao buscar cliente: ${error.message}`);
+    }
+
+    return data;
   }
 
   async update(
     id: number,
     dados: Partial<Omit<Customer, 'id'>>
   ): Promise<void> {
-    const db = await getDB();
+    // Remove campos vazios
+    const updateData = Object.fromEntries(
+      Object.entries(dados).filter(([_, value]) =>
+        value !== undefined && value !== null && value !== ''
+      )
+    );
 
-    const fields: string[] = [];
-    const values: any[] = [];
-
-    for (const [key, value] of Object.entries(dados)) {
-      if (value !== undefined && value !== null && value !== '') {
-        fields.push(`${key} = ?`);
-        values.push(value);
-      }
-    }
-
-    if (fields.length === 0) {
+    if (Object.keys(updateData).length === 0) {
       throw new Error('Nenhum campo válido para atualizar');
     }
 
-    const sql = `UPDATE CUSTOMER SET ${fields.join(', ')} where id = ?`;
-    values.push(id);
+    const { error } = await supabase
+      .from('customer')
+      .update(updateData)
+      .eq('id', id);
 
-    await db.run(sql, values);
+    if (error) {
+      throw new Error(`Erro ao atualizar cliente: ${error.message}`);
+    }
   }
 
   async delete(id: number): Promise<void> {
-    const db = await getDB();
-    await db.run(`DELETE FROM CUSTOMER WHERE ID = ?`, [id]);
+    const { error } = await supabase
+      .from('customer')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(`Erro ao deletar cliente: ${error.message}`);
+    }
   }
 }
 

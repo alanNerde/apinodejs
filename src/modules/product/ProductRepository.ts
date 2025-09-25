@@ -1,54 +1,82 @@
-import { getDB } from '../../database/connection';
+import { supabase } from '../../database/supabase';
 import { Product } from './ProductModel';
 
 class ProductRepository {
   async create(product: Omit<Product, 'id'>): Promise<void> {
-    const db = await getDB();
-    await db.run(
-      `INSERT INTO product (name, description, price, status)
-       VALUES (?, ?, ?, ?)`,
-      [product.name, product.description, product.price, product.status]
-    );
+    const { error } = await supabase
+      .from('product')
+      .insert({
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        status: product.status
+      });
+
+    if (error) {
+      throw new Error(`Erro ao criar produto: ${error.message}`);
+    }
   }
 
   async findAll(): Promise<Product[]> {
-    const db = await getDB();
-    const products = await db.all('select * from product');
-    return products;
+    const { data, error } = await supabase
+      .from('product')
+      .select('*');
+
+    if (error) {
+      throw new Error(`Erro ao buscar produtos: ${error.message}`);
+    }
+
+    return data;
   }
 
   async findById(id: number): Promise<Product | null> {
-    const db = await getDB();
-    const product = await db.get('select * from product where id = ?', [id]);
-    return product ?? null;
+    const { data, error } = await supabase
+      .from('product')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null; // Produto não encontrado
+      }
+      throw new Error(`Erro ao buscar produto: ${error.message}`);
+    }
+
+    return data;
   }
 
   async put(id: number, dados: Partial<Omit<Product, 'id'>>): Promise<void> {
-    const db = await getDB();
+    // Remove campos vazios
+    const updateData = Object.fromEntries(
+      Object.entries(dados).filter(([_, value]) =>
+        value !== undefined && value !== null && value !== ''
+      )
+    );
 
-    const fields: string[] = [];
-    const values: any[] = [];
+    if (Object.keys(updateData).length === 0) {
+      throw new Error('Nenhum campo válido para atualizar');
+    }
 
-    for (const [key, value] of Object.entries(dados)) {
-      if (value !== undefined && value !== null && value !== '') {
-        fields.push(`${key} = ?`);
-        values.push(value);
-      }
+    const { error } = await supabase
+      .from('product')
+      .update(updateData)
+      .eq('id', id);
 
-      if (fields.length === 0) {
-        throw new Error('Nenhum campo válido para atualizar');
-      }
-
-      const sql = `UPDATE PRODUCT SET ${fields.join(', ')} where id = ?`;
-      values.push(id);
-
-      await db.run(sql, values);
+    if (error) {
+      throw new Error(`Erro ao atualizar produto: ${error.message}`);
     }
   }
 
   async delete(id: number): Promise<void> {
-    const db = await getDB();
-    db.run(`DELETE FROM PRODUCT WHERE ID = ?`, [id]);
+    const { error } = await supabase
+      .from('product')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(`Erro ao deletar produto: ${error.message}`);
+    }
   }
 }
 

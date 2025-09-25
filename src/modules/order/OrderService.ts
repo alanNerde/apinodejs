@@ -1,6 +1,6 @@
 import { getDB } from '../../database/connection';
 import { orderItemRepository } from '../orderItem/OrderItemRepository';
-import { OrderDto, OrderDtoWithoutId } from './OrderDto';
+import { OrderDtoWithoutId, OrderDtoWithoutTotalAmount } from './OrderDto';
 import { Order } from './OrderModel';
 import OrderRepository from './OrderRepository';
 
@@ -9,7 +9,7 @@ export class OrderService {
    * Cria uma venda e todos os seus itens dentro de uma transação.
    * @param dados Objeto contendo os campos da venda e um array `itens`
    */
-  async criar(dados: OrderDto): Promise<number> {
+  async criar(dados: OrderDtoWithoutTotalAmount): Promise<number> {
     const db = await getDB();
     try {
       await db.run('BEGIN TRANSACTION');
@@ -17,7 +17,7 @@ export class OrderService {
       // 1) insere o cabeçalho da venda
       const vendaId = await OrderRepository.createOrder({
         customer: dados.customer,
-        total_amount: dados.total_amount,
+        total_amount: 0,
         date: dados.date,
         status: dados.status,
         address: dados.address,
@@ -33,6 +33,12 @@ export class OrderService {
           status: item.status,
         });
       }
+
+      const total_order = dados.itens.reduce(
+        (acumulado, item) => acumulado + (item.amount * item.unit_price), 0
+      )
+
+      await OrderRepository.putOrder(vendaId, {total_amount: total_order});
 
       // 3) confirma tudo
       await db.run('COMMIT');

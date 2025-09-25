@@ -4,6 +4,7 @@ import YAML from 'yamljs';
 export function getSwaggerSpec() {
   const productDocument = YAML.load(path.join(__dirname, './product.yaml'));
   const customerDocument = YAML.load(path.join(__dirname, './customer.yaml'));
+  const orderDocument = YAML.load(path.join(__dirname, './order.yaml'));
   return {
     openapi: '3.0.0',
     info: {
@@ -14,16 +15,19 @@ export function getSwaggerSpec() {
     servers: [{ url: 'http://localhost:3000/api' }],
     tags: [
       ...(productDocument.tags || []),
-      ...(customerDocument.tags || [])
+      ...(customerDocument.tags || []),
+      ...(orderDocument.tags || [])
     ],
     paths: {
       ...productDocument.paths,
       ...customerDocument.paths,
+      ...orderDocument.paths,
     },
     components: {
       schemas: {
         ...productDocument.components.schemas,
         ...customerDocument.components.schemas,
+        ...orderDocument.components.schemas,
       },
     },
   };

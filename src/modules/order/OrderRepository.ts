@@ -1,69 +1,108 @@
-import { getDB } from '../../database/connection';
+import { supabase } from '../../database/supabase';
 import { OrderDto, OrderDtoWithoutId } from './OrderDto';
 import { Order } from './OrderModel';
 
 export class OrderRepository {
   async createOrder(order: Omit<Order, 'id'>): Promise<number> {
-    const db = await getDB();
-    const result = await db.run(
-      `INSERT INTO "ORDER" (customer, total_amount, date, status, address)
-       VALUES (?, ?, ?, ?, ?)`,
-      [
-        order.customer,
-        order.total_amount,
-        order.date,
-        order.status,
-        order.address,
-      ]
-    );
-    return Number(result.lastID);
+    const { data, error } = await supabase
+      .from('order')
+      .insert({
+        customer_id: order.customer,
+        total_amount: order.total_amount,
+        date: order.date,
+        status: order.status,
+        address_id: order.address
+      })
+      .select('id')
+      .single();
+
+    if (error) {
+      throw new Error(`Erro ao criar pedido: ${error.message}`);
+    }
+
+    return data.id;
   }
 
   async listAll(): Promise<Order[] | null> {
-    const db = await getDB();
-    const allOrders = await db.all(" SELECT * FROM 'ORDER' ");
-    return allOrders ?? null;
+    const { data, error } = await supabase
+      .from('order')
+      .select('*');
+
+    if (error) {
+      throw new Error(`Erro ao listar pedidos: ${error.message}`);
+    }
+
+    return data;
   }
 
   async listById(id: number): Promise<Order | null> {
-    const db = await getDB();
-    const order = await db.get(" SELECT * FROM 'ORDER' WHERE ID = ?", [id]);
-    return order ?? null;
+    const { data, error } = await supabase
+      .from('order')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null; // Pedido não encontrado
+      }
+      throw new Error(`Erro ao buscar pedido: ${error.message}`);
+    }
+
+    return data;
   }
 
   async listOrderWithItens(id: number): Promise<OrderDto | null> {
-    const db = await getDB();
-    const order = await this.listById(id);
-    if (!order) return null;
-    const itens = await db.all('SELECT * FROM ORDER_ITEM WHERE "order" = ?', [
-      id,
-    ]);
-    /*aqui o ... é um spread operator (operador que espalha). Ele está criando um objeto com
-    as propriedades de order mais o array de itens.
-    */
-    return { ...order, itens };
+    const { data: order, error: orderError } = await supabase
+      .from('order')
+      .select(`
+        *,
+        itens:order_item(*)
+      `)
+      .eq('id', id)
+      .single();
+
+    if (orderError) {
+      if (orderError.code === 'PGRST116') {
+        return null; // Pedido não encontrado
+      }
+      throw new Error(`Erro ao buscar pedido com itens: ${orderError.message}`);
+    }
+
+    return order;
   }
 
-  async putOrder(id: number, date: Partial<OrderDtoWithoutId>): Promise<void> {
-    const db = await getDB();
-    let fields: string[] = [];
-    const values: any[] = [];
+  async putOrder(id: number, data: Partial<OrderDtoWithoutId>): Promise<void> {
+    // Remove campos vazios
+    const updateData = Object.fromEntries(
+      Object.entries(data).filter(([_, value]) =>
+        value !== undefined && value !== null && value !== ''
+      )
+    );
 
-    Object.entries(date).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        values.push(value);
-        fields.push(`${key} = ?`);
-      }
-    });
+    if (Object.keys(updateData).length === 0) {
+      throw new Error('Nenhum campo válido para atualizar');
+    }
 
-    const fieldsSingleString = fields.join(', ');
-    const sql = `UPDATE 'ORDER' SET ${fieldsSingleString} `;
-    await db.run(sql, values);
+    const { error } = await supabase
+      .from('order')
+      .update(updateData)
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(`Erro ao atualizar pedido: ${error.message}`);
+    }
   }
 
   async delete(id: number): Promise<void> {
-    const db = await getDB();
-    await db.run(`DELETE FROM 'ORDER' WHERE ID = ?`, [id]);
+    const { error } = await supabase
+      .from('order')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(`Erro ao deletar pedido: ${error.message}`);
+    }
   }
 }
 

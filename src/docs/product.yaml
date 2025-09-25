@@ -49,7 +49,7 @@ paths:
           required: true
           description: The ID of the product to retrieve.
           schema:
-            type: string
+            type: integer
       responses:
         "200":
           description: A single product
@@ -70,7 +70,7 @@ paths:
           required: true
           description: The ID of the product to update.
           schema:
-            type: string
+            type: integer
       requestBody:
         required: true
         content:
@@ -97,7 +97,7 @@ paths:
           required: true
           description: The ID of the product to delete.
           schema:
-            type: string
+            type: integer
       responses:
         "204":
           description: Product deleted successfully

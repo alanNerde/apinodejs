@@ -21,3 +21,11 @@ export interface OrderDtoWithoutId {
   status: string;
   address: number;
 }
+
+export interface OrderDtoWithoutTotalAmount{
+  customer: number;
+  date: string;
+  status: string;
+  address: number;
+  itens: OrderItemDto[];
+}
