@@ -11,6 +11,20 @@
   ],
   "routes": [
     {
+      "src": "/docs/(.*)",
+      "headers": {
+        "Access-Control-Allow-Origin": "*"
+      },
+      "dest": "src/server.ts"
+    },
+    {
+      "src": "/docs",
+      "headers": {
+        "Access-Control-Allow-Origin": "*"
+      },
+      "dest": "src/server.ts"
+    },
+    {
       "src": "/api/(.*)",
       "headers": {
         "Access-Control-Allow-Origin": "*",

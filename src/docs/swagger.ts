@@ -3,11 +3,26 @@ import path from 'path';
 import YAML from 'yamljs';
 
 // Log para debug do ambiente
-console.log('Environment Debug:', {
+const debugInfo: Record<string, any> = {
   NODE_ENV: process.env.NODE_ENV,
+  VERCEL_ENV: process.env.VERCEL_ENV,
+  VERCEL_URL: process.env.VERCEL_URL,
   CWD: process.cwd(),
-  DIR_CONTENT: fs.readdirSync(process.cwd())
-});
+};
+
+try {
+  debugInfo.DIR_CONTENT = fs.readdirSync(process.cwd());
+  const docsPath = path.join(process.cwd(), 'src', 'docs');
+  console.log('Checking docs path:', docsPath);
+  console.log('Docs path exists:', fs.existsSync(docsPath));
+  if (fs.existsSync(docsPath)) {
+    debugInfo.DOCS_CONTENT = fs.readdirSync(docsPath);
+  }
+} catch (error) {
+  console.error('Error reading directory:', error);
+}
+
+console.log('Environment Debug:', debugInfo);
 
 // Função para carregar YAML embutido como string
 const getEmbeddedYaml = (filename: string) => {
