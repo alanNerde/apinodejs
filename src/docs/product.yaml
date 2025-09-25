@@ -1,4 +1,4 @@
-// Description: Configuração do Swagger para documentação da API
+# Description: Configuração do Swagger para documentação da API
 tags:
   - name: Products
     description: Operations related to products
